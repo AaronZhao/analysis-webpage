@@ -1,0 +1,84 @@
+<!--  
+此页面做为user.html弹出框中的子页面，使用href方式从外部引入，需将所有代码写在body标签中，
+可省略body标签之外的所有内容。
+保存按钮区域div放在放外层标签，不能以其他带样式标签包裹
+
+以表格方式布局，设置table具体宽度，每列第一行单元格设置该列宽度
+具体宽度根据内容而定，弹出框宽度根据table宽度而定
+-->
+<script>
+$(function(){
+	$.extend($.fn.validatebox.defaults.rules, {
+		/*必须和某个字段相等*/
+	    equalTo: { 
+	    	validator: function (value, param) { 
+	    		return $(param[0]).val() == value; 
+	    	}, 
+	    	message: '两次输入的密码不一致!' 
+	    }
+	});
+	$("#addUser_cancel").on("click", function(){
+		$("#parent_win").window("close");
+	});
+	$("#addUser_saveAndAdd").on('click',function(){
+		$('#ff').form({
+		    url:"{:U('__MODULE__/User/addUser?op=save')}",
+		    onSubmit: function(){
+				return $(this).form('validate');
+		    },
+		    success:function(data){
+		    	var obj = jQuery.parseJSON(data); 
+		        if( obj.statusCode == 200 ){
+		        	$parent.messager.alert("提示",obj.message, "info");
+		        	$("#parent_win").window("close");
+		        	var tab = $('#tabs').tabs('getTab','用户管理'); // 取得第一个tab 
+		        	$('#tabs').tabs('update', { 
+		        	tab: tab, 
+		        	options: { 
+		        	title: '用户管理'
+		        	}});
+
+		        }
+		        else{
+		        	$parent.messager.alert("错误",obj.message, "error");
+		        }
+		    }
+		});
+		//提交表单
+		$('#ff').submit();
+	})
+})
+</script>
+<!-- 内容 -->
+<form id="ff" method="POST">
+<div class="content">
+    <table width="280" border="0" align="center" cellpadding="3">
+      <tr>
+        <td width="80" align="right"><label for="word"><span class="x">*</span>用户名：</label></td>
+        <td width="200">
+        <input class="easyui-validatebox" type="text" name="user_username" id="user_username" required="true" validType="length[1,100]" missingMessage="用户名不能为空!" invalidMessage="无效的用户名" /></td>
+      </tr>
+      <tr>
+        <td width="80" align="right"><label for="word"><span class="x">*</span>真实姓名：</label></td>
+        <td width="200">
+        <input class="easyui-validatebox" type="text" name="user_realname" id="user_realname" required="true" validType="length[1,100]" missingMessage="用户名不能为空!" invalidMessage="无效的用户名" /></td>
+      </tr>
+      <tr>
+        <td width="80" align="right"><label for="word"><span class="x">*</span>密码：</label></td>
+        <td width="200">
+        <input class="easyui-validatebox" type="password" name="user_password" id="user_password" required="true" validType="length[6,12]" missingMessage="密码必须在6-12位之间" invalidMessage="无效的密码" value＝"" /></td>
+      </tr>
+      <tr>
+        <td width="80" align="right"><label for="word"><span class="x">*</span>确认密码：</label></td>
+        <td width="200">
+        <input class="easyui-validatebox" type="password" name="user_confirm" id="user_confirm" required="true" validType="equalTo['#user_password']" missingMessage="两次密码必须一致" value＝"" /></td>
+      </tr>
+    </table>
+</div>
+<!-- 弹出框按钮 -->
+<div class="windowButton">
+     <a id="addUser_saveAndAdd" class="easyui-linkbutton my-dialog-button" plain="true" icon="icon-ok" href="javascript:void(0)" > 保存并新增</a> 
+     <!-- <a id="addUser_save" class="easyui-linkbutton my-dialog-button" plain="true" icon="icon-save" href="javascript:void(0)" > 保存</a>  -->
+     <a id="addUser_cancel" class="easyui-linkbutton my-dialog-button" plain="true" icon="icon-cancel" href="javascript:void(0)" >取消</a>
+</div>
+</form>

@@ -1,0 +1,148 @@
+<include file="Public/new_tab_header.html" />
+<body class="easyui-layout" >
+<script>
+
+$(function(){
+	$("#type_tt").treegrid({
+		height:$("#type_body").height()-5,
+		width:$("#type_body").width(),
+		url:"{:U('__MODULE__/type/getTypes')}",  
+		method: 'get',
+		rownumbers: true,
+		idField: 'id',
+		treeField: 'name',
+		loadFilter: myLoadFilter,
+		toolbar:'#type_tt_btn',  
+	});
+	
+	//新增弹出框
+	$("#type_save").on("click", function(){
+		var obj = $('#type_tt').treegrid('getSelected');
+		if( obj == undefined ){
+			$parent.messager.alert("提示","请选择类别所属父类!", "info");
+			return false;
+		}
+		if( obj.level > 4 )
+		{
+			$parent.messager.alert("提示","此类别下不可以再添加子类","info");	
+			return false;
+		}
+		$parent("#parent_win").window({
+			width:274,
+			height:225,
+			href:"/type/addType?pid="+obj.id,
+			title:'新增类别'
+		});
+	});
+	//修改
+	$("#type_info").on("click", function(){
+		var obj =  $('#type_tt').treegrid('getSelected');
+		if( obj == undefined ){
+			$parent.messager.alert("提示","请选择类别!", "info");
+			return false;
+		}
+		if( obj.level < 3 )
+		{
+			$parent.messager.alert("提示","此类别无关键字信息","info");	
+			return false;
+		}
+		$parent("#parent_win").window({
+			width:400,
+			height:500,
+			href:"/type/wordInfo?id="+obj.id,
+			title:'类别关键字管理'
+		});
+	});
+	//删除
+	$("#type_delete").on("click", function(){
+		var obj =  $('#type_tt').treegrid('getSelected');
+		if( obj == undefined ){
+			$parent.messager.alert("提示","请选择类别!", "info");
+			return false;
+		}
+		$.messager.confirm('删除类别','您确认要删除此类别（'+obj.name+'）吗？',function(r){
+		    if (r){
+				$.post('/type/delType',{id:obj.id},function(data){
+		            //alert(data);
+		            if( data.statusCode == 200 ){
+		            	$parent.messager.alert("提示",data.message, "info");
+		            	$("#type_tt").treegrid('load');
+		            	
+		            }else{
+		            	$parent.messager.alert("错误",data.message, "error");
+		            }
+		    	},'json');
+		    }
+		});
+	});
+})
+
+function viewDetail(date, id){
+	$parent.messager.alert("提示","查询详细", "info");
+}
+
+//监听窗口大小变化
+window.onresize = function(){
+	setTimeout(domresize,300);
+};
+//改变表格宽高
+function domresize(){
+	$('#type_tt').datagrid('resize',{  
+		height:$("#type_body").height()-$('#type_search_area').height()-5,
+		width:$("#type_body").width()
+	});
+}
+
+function myLoadFilter(data,parentId){
+	function setData(){
+		var todo = [];
+		for(var i=0; i<data.length; i++){
+			todo.push(data[i]);
+		}
+		while(todo.length){
+			var node = todo.shift();
+			if (node.children){
+				node.state = 'closed';
+				node.children1 = node.children;
+				node.children = undefined;
+				todo = todo.concat(node.children1);
+			}
+		}
+	}
+	
+	setData(data);
+	var tg = $(this);
+	var opts = tg.treegrid('options');
+	opts.onBeforeExpand = function(row){
+		if (row.children1){
+			tg.treegrid('append',{
+				parent: row[opts.idField],
+				data: row.children1
+			});
+			row.children1 = undefined;
+			tg.treegrid('expand', row[opts.idField]);
+		}
+		return row.children1 == undefined;
+	};
+	return data;
+}
+</script>
+
+<div id="type_body" region="center" > 
+  <!-- 数据表格区域 -->
+  <table id="type_tt" style="table-layout:fixed;" >
+  	<thead>
+		<tr>
+			<th field="name" width="320">Name</th>
+		</tr>
+	</thead>
+ </table>
+  <!-- 表格顶部工具按钮 -->
+  <div id="type_tt_btn">
+      <a href="javascript:void(0)"  id="type_save" class="easyui-linkbutton" iconCls="icon-add" plain="true">新增类型</a>
+      <a href="javascript:void(0)"  id="type_delete" class="easyui-linkbutton" iconCls="icon-remove" plain="true">删除类型</a>
+   	  <a href="javascript:void(0)"  id="type_info" class="easyui-linkbutton" iconCls="icon-edit" plain="true">关键字详情</a>
+   </div>
+</div>
+</body>
+</html>

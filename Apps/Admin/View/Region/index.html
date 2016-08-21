@@ -1,0 +1,112 @@
+<include file="Public/new_tab_header.html" />
+<body class="easyui-layout" >
+<script>
+
+$(function(){
+	$("#region_tt").datagrid({
+		height:$("#region_body").height()-$('#region_search_area').height()-5,
+		width:$("#region_body").width(),
+		idField:'userId',
+		//data: data,
+		url:"{:U('__MODULE__/region/getDatas')}",  
+		singleSelect:true, 
+		nowrap:true,
+		fitColumns:true,
+		rownumbers:true,
+		showPageList:false,
+		columns:[[
+			{field:'id',title:'ID',width:50,halign:"center", align:"left"},
+			{field:'name',title:'Name',width:80,halign:"center", align:"left"},
+			{field:'alias',title:'别称',width:300,halign:"center", align:"left"},
+		]],
+		toolbar:'#region_tt_btn',  
+        pagination:true,
+		onDblClickRow:function(rowIndex, rowData){
+			viewDetail(rowData.userId);
+		}
+	});
+	
+	//新增弹出框
+	$("#region_save").on("click", function(){
+		$parent("#parent_win").window({
+			width:500,
+			height:200,
+			href:"{:U('__MODULE__/region/addRow')}",
+			title:'新增地区'
+		});
+	});
+	//修改
+	$("#region_update").on("click", function(){
+		var obj =  $('#region_tt').datagrid('getSelected');
+		if( obj == undefined ){
+			$parent.messager.alert("提示","请选择要修改的项!", "info");
+			return false;
+		}
+		$parent("#parent_win").window({
+			width:274,
+			height:225,
+			href:"{:U('__MODULE__/region/modRow',array('id'=>"+obj.id+"))}",
+			title:'编辑地区'
+		});
+	});
+	//删除
+	$("#region_delete").on("click", function(){
+		var obj =  $('#region_tt').datagrid('getSelected');
+		$.post('./delRow',{id:obj.id},function(data){
+            //alert(data);
+            if( data.statusCode == 200 ){
+            	$parent.messager.alert("提示",data.message, "info");
+            	$("#region_tt").datagrid('load');
+            	
+            }else{
+            	$parent.messager.alert("错误",data.message, "error");
+            }
+    	},'json');
+	});
+})
+
+function viewDetail(date, id){
+	$parent.messager.alert("提示","查询详细", "info");
+}
+
+//监听窗口大小变化
+window.onresize = function(){
+	setTimeout(domresize,300);
+};
+//改变表格宽高
+function domresize(){
+	$('#region_tt').datagrid('resize',{  
+		height:$("#region_body").height()-$('#region_search_area').height()-5,
+		width:$("#region_body").width()
+	});
+}
+</script>
+
+<div id="region_body" region="center" > 
+  <!-- 查询条件区域 -->
+  <div id="region_search_area" >
+    <div id="conditon">
+      <table border="0">
+        <tr>
+          <td>Name：</td>
+          <td ><input  name="name" id="name"   /></td>
+          <td>
+              <a  href="javascript:void(0)" class="easyui-linkbutton my-search-button" iconCls="icon-search" plain="true">查询</a> 
+              <a  href="javascript:void(0)" class="easyui-linkbutton my-search-button" iconCls="icon-reset" plain="true" >重置</a>
+          </td>
+        </tr>
+      </table>
+    </div>
+    <span id="openOrClose">111</span> 
+  </div>
+  <!-- 数据表格区域 -->
+  <table id="region_tt" style="table-layout:fixed;" ></table>
+  <!-- 表格顶部工具按钮 -->
+  <div id="region_tt_btn">
+      <a href="javascript:void(0)"  id="region_save" class="easyui-linkbutton" iconCls="icon-add" plain="true">新增</a>
+      <a href="javascript:void(0)"  id="region_update" class="easyui-linkbutton" iconCls="icon-edit" plain="true">编辑</a>
+      <a href="javascript:void(0)"  id="region_delete" class="easyui-linkbutton" iconCls="icon-remove" plain="true">删除</a>
+   </div>
+</div>
+</body>
+</html>

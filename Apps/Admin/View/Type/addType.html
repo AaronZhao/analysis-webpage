@@ -1,0 +1,65 @@
+<script>
+$(function(){
+	$.extend($.fn.validatebox.defaults.rules, {
+		/*必须和某个字段相等*/
+	    equalTo: { 
+	    	validator: function (value, param) { 
+	    		return $(param[0]).val() == value; 
+	    	}, 
+	    	message: '两次输入的密码不一致!' 
+	    }
+	});
+	$("#addType_cancel").on("click", function(){
+		$("#parent_win").window("close");
+	});
+	$("#addType_saveAndAdd").on('click',function(){
+		$('#type_ff').form({
+		    url:"{:U('__MODULE__/type/addType')}",
+		    onSubmit: function(){
+				return $(this).form('validate');
+		    },
+		    success:function(data){
+		    	var obj = jQuery.parseJSON(data); 
+		        if( obj.statusCode == 200 ){
+		        	$parent.messager.alert("提示",obj.message, "info");
+		        	$("#parent_win").window("close");
+		        	var tab = $('#tabs').tabs('getTab','类别管理'); // 取得第一个tab 
+		        	$('#tabs').tabs('update', { 
+		        	tab: tab, 
+		        	options: { 
+		        	title: '类别管理'
+		        	}});
+
+		        }
+		        else{
+		        	$parent.messager.alert("错误",obj.message, "error");
+		        	$("#parent_win").window("close");
+		        }
+		    }
+		});
+		//提交表单
+		$('#type_ff').submit();
+	})
+})
+</script>
+<!-- 内容 -->
+<form id="type_ff" method="POST">
+<div class="content">
+	<table width="280" border="0" align="center" cellpadding="3">
+      <tr>
+        <td width="80" align="right"><label for="word"><span class="x">*</span>Name：</label></td>
+        <td width="200">
+        <input type="hidden" name="type_pid" id="type_pid" value="{$pid}" />
+        <input type="hidden" name="op" id="op" value="save" />
+        <input class="easyui-validatebox" type="text" name="type_name" id="type_name" required="true" validType="length[1,100]" missingMessage="类别名称不能为空!" invalidMessage="无效的类别名称！" /></td>
+        
+      </tr>
+    </table>
+</div>
+<!-- 弹出框按钮 -->
+<div class="windowButton">
+     <a id="addType_saveAndAdd" class="easyui-linkbutton my-dialog-button" plain="true" icon="icon-ok" href="javascript:void(0)" > 保存并新增</a> 
+     <!-- <a id="addUser_save" class="easyui-linkbutton my-dialog-button" plain="true" icon="icon-save" href="javascript:void(0)" > 保存</a>  -->
+     <a id="addType_cancel" class="easyui-linkbutton my-dialog-button" plain="true" icon="icon-cancel" href="javascript:void(0)" >取消</a>
+</div>
+</form>

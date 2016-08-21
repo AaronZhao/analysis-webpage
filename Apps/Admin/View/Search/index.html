@@ -1,0 +1,160 @@
+<include file="Public/new_tab_header.html" />
+<body class="easyui-layout" >
+<script>
+
+$(function(){
+	$("#search_up_tt").datagrid({
+		height:250,
+		width:$("#search_body").width(),
+		title:"内部条目",
+		idField:'id',
+		//data: data,
+		url:"{:U('__MODULE__/search/getDatas')}",  
+		singleSelect:true, 
+		nowrap:true,
+		fitColumns:true,
+		rownumbers:true,
+		showPageList:false,
+		columns:[[
+			{field:'id',title:'ID',width:50,halign:"center", align:"left"},
+			{field:'title',title:'标题',width:80,halign:"center", align:"left"},
+			{field:'date',title:'日期',width:300,halign:"center", align:"left"},
+		]],
+		toolbar:'#search_tt_btn',  
+        pagination:true,
+		onDblClickRow:function(rowIndex, rowData){
+			viewDetail(rowData.userId);
+		}
+	});
+	
+	$("#search_net_tt").datagrid({
+		height:250,
+		width:$("#search_body").width(),
+		title:"抓去条目",
+		idField:'id',
+		//data: data,
+		url:"{:U('__MODULE__/search/getDatas')}",  
+		singleSelect:true, 
+		nowrap:true,
+		fitColumns:true,
+		rownumbers:true,
+		showPageList:false,
+		columns:[[
+			{field:'id',title:'ID',width:50,halign:"center", align:"left"},
+			{field:'title',title:'标题',width:80,halign:"center", align:"left"},
+			{field:'date',title:'日期',width:300,halign:"center", align:"left"},
+		]],
+		toolbar:'#search_tt_net_btn',  
+        pagination:true,
+		onDblClickRow:function(rowIndex, rowData){
+			viewDetail(rowData.userId);
+		}
+	});
+	
+	$("search_panel").panel({
+		width:$("#search_body").width(),
+		height:"auto"
+	});
+	
+	//新增弹出框
+	$("#search_save").on("click", function(){
+		$parent("#parent_win").window({
+			width:500,
+			height:200,
+			href:"{:U('__MODULE__/search/addRow')}",
+			title:'新增地区'
+		});
+	});
+	//修改
+	$("#search_update").on("click", function(){
+		var obj =  $('#search_tt').datagrid('getSelected');
+		if( obj == undefined ){
+			$parent.messager.alert("提示","请选择要修改的项!", "info");
+			return false;
+		}
+		$parent("#parent_win").window({
+			width:274,
+			height:225,
+			href:"{:U('__MODULE__/search/modRow',array('id'=>"+obj.id+"))}",
+			title:'编辑地区'
+		});
+	});
+	//删除
+	$("#search_delete").on("click", function(){
+		var obj =  $('#search_tt').datagrid('getSelected');
+		$.post('./delRow',{id:obj.id},function(data){
+            //alert(data);
+            if( data.statusCode == 200 ){
+            	$parent.messager.alert("提示",data.message, "info");
+            	$("#search_tt").datagrid('load');
+            	
+            }else{
+            	$parent.messager.alert("错误",data.message, "error");
+            }
+    	},'json');
+	});
+})
+
+function viewDetail(date, id){
+	$parent.messager.alert("提示","查询详细", "info");
+}
+
+//监听窗口大小变化
+window.onresize = function(){
+	setTimeout(domresize,300);
+};
+//改变表格宽高
+function domresize(){
+	$('#search_tt').datagrid('resize',{  
+		height:$("#search_body").height()-$('#search_search_area').height()-5,
+		width:$("#search_body").width()
+	});
+}
+</script>
+
+<div id="search_body" region="center" > 
+  <!-- 查询条件区域 -->
+  <div id="search_search_area" >
+    <div id="conditon">
+      <table border="0">
+        <tr>
+          <td>银行：</td>
+          <td >
+          	<select id="search_bank" >
+          	</select>&nbsp;&nbsp;|&nbsp;&nbsp; 
+          </td>
+          <td>地区：</td>
+          <td >
+          	<select id="search_region" >
+          	</select> &nbsp;&nbsp;|&nbsp;&nbsp;
+          </td>
+          <td>追加关键词：</td>
+          <td >
+          	<input type="text" id="search_keyword" value="" />多个关键词用',' 分割！&nbsp;&nbsp;&nbsp;&nbsp;
+          </td>
+          <td>
+              <a  href="javascript:void(0)" class="easyui-linkbutton my-search-button" iconCls="icon-search" plain="true">查询</a> 
+              <a  href="javascript:void(0)" class="easyui-linkbutton my-search-button" iconCls="icon-reset" plain="true" >重置</a>
+          </td>
+        </tr>
+      </table>
+    </div>
+    <span id="openOrClose">111</span> 
+  </div>
+  <!-- 数据表格区域 -->
+  <table id="search_up_tt" style="table-layout:fixed;" ></table>
+  <!-- 表格顶部工具按钮 -->
+  <div id="search_tt_btn">
+      <a href="javascript:void(0)"  id="search_save" class="easyui-linkbutton" iconCls="icon-add" plain="true">添加文章</a>
+      <a href="javascript:void(0)"  id="search_update" class="easyui-linkbutton" iconCls="icon-edit" plain="true">上传文章</a>
+      <a href="javascript:void(0)"  id="search_delete" class="easyui-linkbutton" iconCls="icon-remove" plain="true">删除</a>
+   </div>
+   <!-- 数据表格区域 -->
+  <table id="search_net_tt" style="table-layout:fixed;" ></table>
+  <!-- 表格顶部工具按钮 -->
+  <div id="search_tt_net_btn">
+      <a href="javascript:void(0)"  id="search_net_delete" class="easyui-linkbutton" iconCls="icon-remove" plain="true">删除</a>
+   </div>
+</div>
+</body>
+</html>

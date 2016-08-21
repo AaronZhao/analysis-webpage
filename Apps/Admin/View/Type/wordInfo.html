@@ -1,0 +1,132 @@
+<!--  
+此页面做为user.html弹出框中的子页面，使用href方式从外部引入，需将所有代码写在body标签中，
+可省略body标签之外的所有内容。
+保存按钮区域div放在放外层标签，不能以其他带样式标签包裹
+
+以表格方式布局，设置table具体宽度，每列第一行单元格设置该列宽度
+具体宽度根据内容而定，弹出框宽度根据table宽度而定
+-->
+<script>
+$(function(){
+	var errorFlag = {$errorFlag};
+	if( errorFlag == 1 ) {
+		$parent.messager.alert("错误","{$errMsg}", "error");
+		$("#parent_win").window("close");
+	}
+	
+	$("#typeword_tt").treegrid({
+		height:350,
+		width:350,
+		url:"{:U('__MODULE__/type/getWords',array('id'=>$id))}",  
+		method: 'get',
+		rownumbers: true,
+		idField: 'id',
+		treeField: 'word',
+		toolbar:'#typeword_tt_btn',  
+	});
+	
+	
+	//删除
+	$("#typeword_delete").on("click", function(){
+		var obj =  $('#typeword_tt').treegrid('getSelected');
+		if( obj == undefined ){
+			$parent.messager.alert("提示","请选择要删除的关键词!", "info");
+			return false;
+		}
+		$.messager.confirm('确认删除','您确认删除该关键词（'+obj.word+'）吗?',function(r){
+		    if (r){
+		    	
+		    	var tid =  $('#typeword_tid').val();
+				$.post('/type/delWord',{wid:obj.id,tid:tid},function(data){
+		            //alert(data);
+		            if( data.statusCode == 200 ){
+		            	$("#typeword_tt").treegrid('load');
+		            	$parent.messager.alert("提示",data.message, "info");
+		            }else{
+		            	$parent.messager.alert("错误",data.message, "error");
+		            }
+		    	},'json');
+		    }
+		});
+		
+	});
+	
+	$.extend($.fn.validatebox.defaults.rules, {
+		/*必须和某个字段相等*/
+	    equalTo: { 
+	    	validator: function (value, param) { 
+	    		return $(param[0]).val() == value; 
+	    	}, 
+	    	message: '两次输入的密码不一致!' 
+	    }
+	});
+	
+	$("#addTypeword_cancel").on("click", function(){
+		$("#parent_win").window("close");
+	});
+	
+	$("#addTypeword_saveAndAdd").on('click',function(){
+		$('#typeword_ff').form({
+		    url:"{:U('__MODULE__/type/addWord')}",
+		    onSubmit: function(){
+				return $(this).form('validate');
+		    },
+		    success:function(data){
+		    	var obj = jQuery.parseJSON(data); 
+		        if( obj.statusCode == 200 ){
+		        	$parent.messager.alert("提示",obj.message, "info");
+		        	$("#typeword_tt").treegrid('load');
+		        	$("#typeword_name").val('');
+		        }
+		        else{
+		        	$parent.messager.alert("错误",obj.message, "error");
+		        }
+		    }
+		});
+		//提交表单
+		$('#typeword_ff').submit();
+	})
+})
+</script>
+<!-- 内容 -->
+<form id="typeword_ff" method="POST">
+<div class="content">
+    <table width="380" border="0" align="center" cellpadding="3">
+      <tr>
+        <td width="80" align="right"><label for="word">类别：</label></td>
+        <td width="300">
+			{$type.name}
+        </td>
+      </tr>
+      <tr>
+      	<td width="380" colspan=2">
+			<!-- 数据表格区域 -->
+		  <table id="typeword_tt" style="table-layout:fixed;" >
+		  	<thead>
+				<tr>
+					<th field="word" width="380">关键词</th>
+				</tr>
+			</thead>
+		 </table>
+		  <!-- 表格顶部工具按钮 -->
+		  <div id="typeword_tt_btn">
+		      <a href="javascript:void(0)"  id="typeword_delete" class="easyui-linkbutton" iconCls="icon-remove" plain="true">删除关键词</a>
+		   </div>
+        </td>
+      </tr>
+      <tr>
+      	<td width="80"  align="right"><label for="typeword_name"><span class="x">*</span>关键词：</label></td>
+        <td width="300" >
+        	<input class="easyui-validatebox" type="text" name="typeword_name" id="typeword_name" required="true" validType="length[1,100]" missingMessage="关键词不能为空!" invalidMessage="无效的关键词" />
+        	<input type="hidden" name="typeword_tid" id="typeword_tid" value="{$type.id}" />
+        </td>
+      </tr>
+    </table>
+</div>
+<!-- 弹出框按钮 -->
+<div class="windowButton">
+     <a id="addTypeword_saveAndAdd" class="easyui-linkbutton my-dialog-button" plain="true" icon="icon-ok" href="javascript:void(0)" > 保存并新增</a> 
+     <!-- <a id="addUser_save" class="easyui-linkbutton my-dialog-button" plain="true" icon="icon-save" href="javascript:void(0)" > 保存</a>  -->
+     <a id="addTypeword_cancel" class="easyui-linkbutton my-dialog-button" plain="true" icon="icon-cancel" href="javascript:void(0)" >取消</a>
+</div>
+</form>

@@ -1,0 +1,101 @@
+<include file="Public/new_tab_header.html" />
+<body class="easyui-layout" >
+<script>
+
+$(function(){
+	$("#site_tt").datagrid({
+		height:$("#site_body").height()-$('#site_search_area').height()-5,
+		width:$("#site_body").width(),
+		idField:'userId',
+		//data: data,
+		url:"{:U('__MODULE__/site/getSites')}",  
+		singleSelect:true, 
+		nowrap:true,
+		fitColumns:true,
+		rownumbers:true,
+		showPageList:false,
+		columns:[[
+			{field:'id',title:'ID',width:50,halign:"center", align:"left"},
+			{field:'url',title:'URL',width:200,halign:"center", align:"left"},
+			{field:'note',title:'备注',width:300,halign:"center", align:"left"},
+		]],
+		toolbar:'#site_tt_btn',  
+        pagination:true,
+		onDblClickRow:function(rowIndex, rowData){
+			viewDetail(rowData.userId);
+		}
+	});
+	
+	//新增弹出框
+	$("#site_save").on("click", function(){
+		$parent("#parent_win").window({
+			width:274,
+			height:225,
+			href:"{:U('__MODULE__/Site/addSite')}",
+			title:'新增站点'
+		});
+	});
+	//修改
+	$("#site_update").on("click", function(){
+		$parent.messager.alert("提示","update", "info");
+	});
+	//删除
+	$("#site_delete").on("click", function(){
+		var obj =  $('#site_tt').datagrid('getSelected');
+		$.post('./delSite',{id:obj.id},function(data){
+            //alert(data);
+            if( data.statusCode == 200 ){
+            	$parent.messager.alert("提示",data.message, "info");
+            	$("#site_tt").datagrid('load');
+            	
+            }else{
+            	$parent.messager.alert("错误",data.message, "error");
+            }
+    	},'json');
+	});
+})
+
+function viewDetail(date, id){
+	$parent.messager.alert("提示","查询详细", "info");
+}
+
+//监听窗口大小变化
+window.onresize = function(){
+	setTimeout(domresize,300);
+};
+//改变表格宽高
+function domresize(){
+	$('#site_tt').datagrid('resize',{  
+		height:$("#site_body").height()-$('#site_search_area').height()-5,
+		width:$("#site_body").width()
+	});
+}
+</script>
+
+<div id="site_body" region="center" > 
+  <!-- 查询条件区域 -->
+  <div id="site_search_area" >
+    <div id="conditon">
+      <table border="0">
+        <tr>
+          <td>URL：</td>
+          <td ><input  name="username" id="username"   /></td>
+          <td>
+              <a  href="javascript:void(0)" class="easyui-linkbutton my-search-button" iconCls="icon-search" plain="true">查询</a> 
+              <a  href="javascript:void(0)" class="easyui-linkbutton my-search-button" iconCls="icon-reset" plain="true" >重置</a>
+          </td>
+        </tr>
+      </table>
+    </div>
+    <span id="openOrClose">111</span> 
+  </div>
+  <!-- 数据表格区域 -->
+  <table id="site_tt" style="table-layout:fixed;" ></table>
+  <!-- 表格顶部工具按钮 -->
+  <div id="site_tt_btn">
+      <a href="javascript:void(0)"  id="site_save" class="easyui-linkbutton" iconCls="icon-add" plain="true">新增</a>
+      <a href="javascript:void(0)"  id="site_delete" class="easyui-linkbutton" iconCls="icon-remove" plain="true">删除</a>
+   </div>
+</div>
+</body>
+</html>

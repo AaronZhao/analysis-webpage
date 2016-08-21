@@ -1,0 +1,22 @@
+<div data-options="region:'north',border:false" style="height:60px; padding:5px; background:#F3F3F3"> 
+    <span id="sysname">华经国研数据采集分析系统</span>
+    <span class="loginInfo">
+    	<font color="blue">[&nbsp;&nbsp;&nbsp;登录用户：</font><b>{$Think.session.username}</b>&nbsp;&nbsp;<font color="blue">角色：</font><b>{$Think.session.realname}</b>&nbsp;&nbsp;<b><a href="{:U('logout')}">退出</a></b>&nbsp;&nbsp;&nbsp;<font color="blue">]</font> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+    	<a href="__MODULE__/index/">主页</a>&nbsp;&nbsp;|&nbsp;&nbsp;
+		<!--<a href="{$WEBURL}keyword/" target="navTab" rel="keyword_m">关键字管理</a>-->
+		<!-- <a href="#" onclick="addTabs('关键字管理','__MODULE__/word/')">关键字管理</a>&nbsp;&nbsp;|&nbsp;&nbsp; -->
+		<!--<a href="{$WEBURL}type/" target="navTab" rel="type_m">类别管理</a>-->
+		<a href="#" onclick="addTabs('类别管理','__MODULE__/type/')">类别管理</a>&nbsp;&nbsp;|&nbsp;&nbsp;
+		<a href="#" onclick="addTabs('站点管理','__MODULE__/site/')">站点管理</a>&nbsp;&nbsp;|&nbsp;&nbsp;
+		<!-- <a href="#" onclick="addTabs('创建字典','__MODULE__/dic/')">创建字典</a>&nbsp;&nbsp;|&nbsp;&nbsp; -->
+		<a href="#" onclick="addTabs('地区管理','__MODULE__/region/')">地区管理</a>&nbsp;&nbsp;|&nbsp;&nbsp;
+		<a href="#" onclick="addTabs('银行管理','__MODULE__/bank/')">银行管理</a>&nbsp;&nbsp;|&nbsp;&nbsp;
+		<a href="#" onclick="addTabs('用户管理','__MODULE__/user/')">用户管理</a>
+    </span>
+    <div class="navinfo">
+	    <foreach name="topTypeArr" item="v">
+	    	<a href="__MODULE__/index?tid={$v.id}" class="easyui-linkbutton" data-options="plain:true">{$v.name}</a>
+		</foreach>
+    </div>
+</div>
+</div>

@@ -1,0 +1,74 @@
+<!--  
+此页面做为user.html弹出框中的子页面，使用href方式从外部引入，需将所有代码写在body标签中，
+可省略body标签之外的所有内容。
+保存按钮区域div放在放外层标签，不能以其他带样式标签包裹
+
+以表格方式布局，设置table具体宽度，每列第一行单元格设置该列宽度
+具体宽度根据内容而定，弹出框宽度根据table宽度而定
+-->
+<script>
+$(function(){
+	$.extend($.fn.validatebox.defaults.rules, {
+		/*必须和某个字段相等*/
+	    equalTo: { 
+	    	validator: function (value, param) { 
+	    		return $(param[0]).val() == value; 
+	    	}, 
+	    	message: '两次输入的密码不一致!' 
+	    }
+	});
+	$("#addSite_cancel").on("click", function(){
+		$("#parent_win").window("close");
+	});
+	$("#addSite_saveAndAdd").on('click',function(){
+		$('#site_ff').form({
+		    url:"{:U('__MODULE__/Site/addSite?op=save')}",
+		    onSubmit: function(){
+				return $(this).form('validate');
+		    },
+		    success:function(data){
+		    	var obj = jQuery.parseJSON(data); 
+		        if( obj.statusCode == 200 ){
+		        	$parent.messager.alert("提示",obj.message, "info");
+		        	$("#parent_win").window("close");
+		        	var tab = $('#tabs').tabs('getTab','站点管理'); // 取得第一个tab 
+		        	$('#tabs').tabs('update', { 
+		        	tab: tab, 
+		        	options: { 
+		        	title: '站点管理'
+		        	}});
+
+		        }
+		        else{
+		        	$parent.messager.alert("错误",obj.message, "error");
+		        }
+		    }
+		});
+		//提交表单
+		$('#site_ff').submit();
+	})
+})
+</script>
+<!-- 内容 -->
+<form id="site_ff" method="POST">
+<div class="content">
+    <table width="280" border="0" align="center" cellpadding="3">
+      <tr>
+        <td width="80" align="right"><label for="word"><span class="x">*</span>URL：</label></td>
+        <td width="200">
+        <input class="easyui-validatebox" type="text" name="site_site" id="site_site" required="true" validType="length[1,100]" missingMessage="URL不能为空!" invalidMessage="无效的URL" /></td>
+      </tr>
+      <tr>
+        <td width="80" align="right"><label for="word"><span class="x">*</span>备注：</label></td>
+        <td width="200">
+        <input class="easyui-validatebox" type="text" name="site_note" id="site_note" /></td>
+      </tr>
+    </table>
+</div>
+<!-- 弹出框按钮 -->
+<div class="windowButton">
+     <a id="addSite_saveAndAdd" class="easyui-linkbutton my-dialog-button" plain="true" icon="icon-ok" href="javascript:void(0)" > 保存并新增</a> 
+     <!-- <a id="addUser_save" class="easyui-linkbutton my-dialog-button" plain="true" icon="icon-save" href="javascript:void(0)" > 保存</a>  -->
+     <a id="addSite_cancel" class="easyui-linkbutton my-dialog-button" plain="true" icon="icon-cancel" href="javascript:void(0)" >取消</a>
+</div>
+</form>

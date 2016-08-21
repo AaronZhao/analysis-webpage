@@ -1,0 +1,105 @@
+<include file="Public/new_tab_header.html" />
+<script>
+
+$(function(){
+	$("#tt").datagrid({
+		height:$("#body").height()-$('#search_area').height()-5,
+		width:$("#body").width(),
+		idField:'userId',
+		//data: data,
+		url:"{:U('__MODULE__/user/getUsers')}",  
+		singleSelect:true, 
+		nowrap:true,
+		fitColumns:true,
+		rownumbers:true,
+		showPageList:false,
+		columns:[[
+			{field:'id',title:'ID',width:50,halign:"center", align:"left"},
+			{field:'username',title:'用户名',width:100,halign:"center", align:"left"},
+			{field:'realname',title:'真实姓名',width:100,halign:"center", align:"left"},
+			{field:'lastloginip',title:'最后登录ip',width:100,halign:"center", align:"left"},
+			{field:'lastlogintime',title:'最后登录时间',width:100,halign:"center", align:"left"}
+		]],
+		toolbar:'#tt_btn',  
+        pagination:true,
+		onDblClickRow:function(rowIndex, rowData){
+			viewDetail(rowData.userId);
+		}
+	});
+	
+	//新增弹出框
+	$("#save").on("click", function(){
+		$parent("#parent_win").window({
+			width:274,
+			height:225,
+			href:"{:U('__MODULE__/User/addUser')}",
+			title:'新增用户'
+		});
+	});
+	//修改
+	$("#update").on("click", function(){
+		$parent.messager.alert("提示","update", "info");
+	});
+	//删除
+	$("#delete").on("click", function(){
+		var obj =  $('#tt').datagrid('getSelected');
+		$.post('./delUser',{id:obj.id},function(data){
+            //alert(data);
+            if( data.statusCode == 200 ){
+            	$parent.messager.alert("提示",data.message, "info");
+            	$("#tt").datagrid('load');
+            	
+            }else{
+            	$parent.messager.alert("错误",data.message, "error");
+            }
+    	},'json');
+	});
+})
+
+function viewDetail(date, id){
+	$parent.messager.alert("提示","查询详细", "info");
+}
+
+//监听窗口大小变化
+window.onresize = function(){
+	setTimeout(domresize,300);
+};
+//改变表格宽高
+function domresize(){
+	$('#tt').datagrid('resize',{  
+		height:$("#body").height()-$('#search_area').height()-5,
+		width:$("#body").width()
+	});
+}
+</script>
+</head>
+<body class="easyui-layout" >
+<div id="body" region="center" > 
+  <!-- 查询条件区域 -->
+  <div id="search_area" >
+    <div id="conditon">
+      <table border="0">
+        <tr>
+          <td>用户名：</td>
+          <td ><input  name="username" id="username"   /></td>
+          <td>&nbsp;真实姓名：</td>
+          <td><input  name="realname" id="realname"  /></td>
+          <td>
+              <a  href="javascript:void(0)" class="easyui-linkbutton my-search-button" iconCls="icon-search" plain="true">查询</a> 
+              <a  href="javascript:void(0)" class="easyui-linkbutton my-search-button" iconCls="icon-reset" plain="true" >重置</a>
+          </td>
+        </tr>
+      </table>
+    </div>
+    <span id="openOrClose">111</span> 
+  </div>
+  <!-- 数据表格区域 -->
+  <table id="tt" style="table-layout:fixed;" ></table>
+  <!-- 表格顶部工具按钮 -->
+  <div id="tt_btn">
+      <a href="javascript:void(0)"  id="save" class="easyui-linkbutton" iconCls="icon-add" plain="true">新增</a>
+      <a href="javascript:void(0)"  id="delete" class="easyui-linkbutton" iconCls="icon-remove" plain="true">删除</a>
+   </div>
+</div>
+</body>
+</html>
