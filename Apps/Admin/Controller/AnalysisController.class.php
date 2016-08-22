@@ -21,8 +21,7 @@ class AnalysisController extends Controller{
     //登录页面
     public function index()
     {
-        phpinfo();exit;
-        $id     = I( 'get.id' );
+        $id    = I( 'get.id' );
         $m_obj = M("site");
         $res = $m_obj->limit(10)->select();
         foreach( $res as $siteinfo )
